@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Shield, Lock, Eye, Bell, Monitor, Smartphone, Settings2, ShieldAlert, Key, Globe, EyeOff, FileDigit, SmartphoneNfc, Server, Zap, Compass, Share2 } from 'lucide-react';
+import { X, Shield, Lock, Eye, Bell, Monitor, Smartphone, Settings2, ShieldAlert, Key, Globe, EyeOff, FileDigit, SmartphoneNfc, Server, Zap, Compass, Share2, ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import { ConnectionModal, BridgePlatform } from './ConnectionModal';
 
 export interface SettingsModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ export interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'privacy' | 'bridges' | 'ai' | 'ulocate'>('profile');
-  const [managingBridge, setManagingBridge] = useState<string | null>(null);
+  const [managingBridge, setManagingBridge] = useState<BridgePlatform | null>(null);
 
   if (!isOpen) return null;
 
@@ -50,12 +51,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             {activeTab === 'profile' && <ProfileTab />}
             {activeTab === 'security' && <SecurityTab />}
             {activeTab === 'privacy' && <PrivacyTab />}
-            {activeTab === 'bridges' && <BridgesTab managingBridge={managingBridge} setManagingBridge={setManagingBridge} />}
+            {activeTab === 'bridges' && <BridgesTab setManagingBridge={setManagingBridge} />}
             {activeTab === 'ai' && <AITab />}
             {activeTab === 'ulocate' && <ULocateTab />}
           </div>
         </div>
       </motion.div>
+      <ConnectionModal isOpen={!!managingBridge} platform={managingBridge} onClose={() => setManagingBridge(null)} />
     </>
   );
 };
@@ -220,93 +222,7 @@ const PrivacyTab = () => (
   </>
 );
 
-const BridgesTab = ({ managingBridge, setManagingBridge }: { managingBridge: string | null, setManagingBridge: (id: string | null) => void }) => {
-  if (managingBridge) {
-    return (
-      <div className="space-y-6">
-        <button onClick={() => setManagingBridge(null)} className="flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors mb-2">
-           <ChevronRight className="w-4 h-4 rotate-180" /> Back to Bridges
-        </button>
-
-        {managingBridge === 'whatsapp' && (
-          <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-[#1a1a1c] border border-zinc-200 dark:border-zinc-800/60 rounded-3xl text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-2">
-              <SmartphoneNfc className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-extrabold">Link WhatsApp</h3>
-            <p className="text-sm text-zinc-500 max-w-sm">Use uChat as a companion device. Open WhatsApp on your primary phone, go to Linked Devices, and scan this QR code.</p>
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-200">
-               <img src="https://api.dicebear.com/7.x/identicon/svg?seed=whatsapp-qr" alt="QR Code Mock" className="w-48 h-48 opacity-80" />
-            </div>
-            <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Or</div>
-            <button className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">Link with Phone Number instead</button>
-          </div>
-        )}
-
-        {managingBridge === 'signal' && (
-          <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-[#1a1a1c] border border-zinc-200 dark:border-zinc-800/60 rounded-3xl text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-2">
-              <Shield className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-extrabold">Link Signal (libsignal)</h3>
-            <p className="text-sm text-zinc-500 max-w-sm">Register your libsignal identity keys to sync chats and make end-to-end encrypted calls natively via uChat.</p>
-            <div className="w-full max-w-xs space-y-3">
-              <input type="text" placeholder="Enter signal:// pairing URI" className="w-full px-4 py-3 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <Button variant="primary">Generate Local Keys</Button>
-            </div>
-          </div>
-        )}
-
-        {managingBridge === 'telegram' && (
-          <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-[#1a1a1c] border border-zinc-200 dark:border-zinc-800/60 rounded-3xl text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 rounded-2xl flex items-center justify-center mb-2">
-              <Share2 className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-extrabold">Link Telegram (MTProto)</h3>
-            <p className="text-sm text-zinc-500 max-w-sm">Connect via MTProto API. Large media will be routed securely through your local network.</p>
-            <div className="w-full max-w-xs space-y-3">
-              <input type="tel" placeholder="Phone Number (+1 234 567 8900)" className="w-full px-4 py-3 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              <Button variant="primary">Send OTP Code</Button>
-            </div>
-          </div>
-        )}
-
-        {managingBridge === 'gmail' && (
-          <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-[#1a1a1c] border border-zinc-200 dark:border-zinc-800/60 rounded-3xl text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mb-2">
-              <FileDigit className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-extrabold">Link Gmail (Workspace API)</h3>
-            <p className="text-sm text-zinc-500 max-w-sm">Enable the 3D Interactive Mail Stream. Requires OAuth granting to read and summarize messages on-device.</p>
-            <Button variant="primary">Authorize via Google Workspace</Button>
-          </div>
-        )}
-
-        {(managingBridge === 'umail' || managingBridge === 'slate' || managingBridge === 'uvault') && (
-          <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-[#1a1a1c] border border-zinc-200 dark:border-zinc-800/60 rounded-3xl text-center space-y-6 shadow-sm relative overflow-hidden">
-             {/* Background Glow */}
-             <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
-                <div className="w-64 h-64 bg-violet-500 rounded-full blur-[80px]" />
-             </div>
-             
-            <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-2xl flex items-center justify-center mb-2 relative z-10">
-              <Sparkles className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-extrabold relative z-10 text-zinc-900 dark:text-zinc-100">
-               Connect {managingBridge === 'umail' ? 'uMail' : managingBridge === 'slate' ? 'Slate (Notes/Calendar)' : 'uVault'}
-            </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-sm relative z-10">
-              This is a native ecosystem app. You can grant access instantly without traditional passwords.
-            </p>
-            <div className="relative z-10 mt-4">
-              <Button variant="primary">Authorize connection via Aura</Button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
+const BridgesTab = ({ setManagingBridge }: { setManagingBridge: (id: BridgePlatform | null) => void }) => {
   return (
     <>
       <Section title="External Protocol Connections">
