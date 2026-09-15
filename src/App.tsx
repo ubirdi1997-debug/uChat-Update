@@ -150,6 +150,35 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Aura AI Productivity Suggestion Hook Simulation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMessages(prev => {
+        if (prev.some(m => m.id === 'aura-suggestion-1')) return prev;
+        
+        return [...prev, {
+          id: 'aura-suggestion-1',
+          senderId: 'aura-ai',
+          senderName: 'Aura System',
+          isMe: false,
+          text: '',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          platform: 'uchat',
+          mediaType: 'aura_suggestion',
+          nudgeData: {
+            type: 'productivity',
+            title: 'Daily Digest Ready?',
+            description: 'I noticed you check your mail often. Would you like me to generate a daily summary of your emails, todos, and schedules automatically?',
+            actionLabel: 'Enable Daily Updates',
+            actionText: 'Enable Daily Updates'
+          } as any
+        }];
+      });
+    }, 15000); // Triggers after 15 seconds for prototype
+
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
   }, [isDark]);
@@ -260,7 +289,7 @@ export default function App() {
   };
 
   return (
-    <div className={`flex h-[100dvh] font-sans text-zinc-900 dark:text-zinc-100 ${isDark ? 'dark bg-[#09090b]' : 'bg-white'} overflow-hidden`}>
+    <div className="flex h-[100dvh] font-sans text-zinc-900 dark:text-zinc-100 bg-white dark:bg-[#09090b] overflow-hidden">
       <AuraSetupModal isOpen={!hasCompletedAuraSetup} onComplete={handleAuraSetupComplete} />
       
       {/* Sidebar */}

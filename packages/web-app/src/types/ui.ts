@@ -25,7 +25,7 @@ export interface ChatMessage {
   platform: SourcePlatform;
   status?: 'sent' | 'delivered' | 'read';
   isUnread?: boolean;
-  mediaType: 'none' | 'image' | 'audio' | 'gmail_card' | 'security_nudge' | 'duress_setup' | 'sticker';
+  mediaType: 'none' | 'image' | 'audio' | 'gmail_card' | 'security_nudge' | 'duress_setup' | 'sticker' | 'aura_suggestion';
   qrPayload?: QRPayload;
   gmailPayload?: GmailCardData;
   audioWaveformMock?: number[];

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 /* Hide scrollbar globally for absolute cleanliness */
 * {

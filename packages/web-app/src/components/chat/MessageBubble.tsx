@@ -4,6 +4,7 @@ import { Reply, SplitSquareHorizontal, Sparkles, CheckCheck, Check, Copy, Trash2
 import { motion, AnimatePresence } from 'motion/react';
 import { ChatMessage } from '../../types/ui';
 import { SecurityNudgeBubble } from './SecurityNudgeBubble';
+import { AuraSuggestionBubble } from './AuraSuggestionBubble';
 import { QRActionPill } from './QRActionPill';
 
 export interface MessageBubbleProps {
@@ -35,6 +36,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         description={message.nudgeData?.description || ''}
         actionLabel={message.nudgeData?.actionLabel || 'View'}
         onAction={() => console.log('Action Nudge')}
+      />
+    );
+  }
+
+  if (message.mediaType === 'aura_suggestion') {
+    return (
+      <AuraSuggestionBubble 
+        title={message.nudgeData?.title || 'Aura Suggestion'}
+        description={message.nudgeData?.description || ''}
+        actionLabel={message.nudgeData?.actionLabel || 'Accept'}
+        onAction={() => console.log('Aura Suggestion Action')}
       />
     );
   }
