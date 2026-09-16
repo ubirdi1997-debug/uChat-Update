@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
 import {defineConfig, Plugin} from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // LINT.IfChange(aistudio_media_plugin)
 function aistudioMediaPlugin(): Plugin {
@@ -66,7 +67,59 @@ function aistudioMediaPlugin(): Plugin {
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), aistudioMediaPlugin()],
+    plugins: [
+      react(), 
+      tailwindcss(), 
+      aistudioMediaPlugin(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
+        manifest: {
+          id: '/',
+          name: 'uSafe Messenger',
+          short_name: 'uSafe',
+          description: 'Beyond Social | Sync Everything',
+          theme_color: '#8b5cf6',
+          background_color: '#121214',
+          display: 'standalone',
+          start_url: '/',
+          scope: '/',
+          share_target: {
+            action: '/',
+            method: 'GET',
+            params: {
+              title: 'title',
+              text: 'text',
+              url: 'url'
+            }
+          } as any,
+          icons: [
+            {
+              src: '/pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any',
+            },
+            {
+              src: '/pwa-maskable-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable',
+            },
+          ],
+        },
+        devOptions: {
+          enabled: true,
+          type: 'module',
+        },
+      })
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

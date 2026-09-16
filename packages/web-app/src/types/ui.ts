@@ -35,11 +35,13 @@ export interface ChatMessage {
   stickerUrl?: string;
   detectedLanguage?: string;
   translation?: string;
+  quickReplies?: string[];
   nudgeData?: {
-    type: 'privacy' | 'security' | 'duress';
+    type: 'privacy' | 'security' | 'duress' | 'productivity';
     title: string;
     description: string;
     actionLabel: string;
+    isCompleted?: boolean;
   };
 }
 

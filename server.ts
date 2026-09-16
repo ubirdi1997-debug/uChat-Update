@@ -1,10 +1,54 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import { GoogleGenAI, Type } from "@google/genai";
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  app.use(express.json());
+
+  // Gemini API Endpoint for Contextual Chips
+  app.post('/api/suggest-chips', async (req, res) => {
+    try {
+      const { lastMessage } = req.body;
+      if (!lastMessage) {
+        return res.json({ chips: ["Okay", "Thanks", "Got it"] });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: `Generate 3 short, distinct, context-aware reply suggestions for this message: "${lastMessage}". Keep them under 4 words each.`,
+        config: {
+          systemInstruction: "You are an AI generating quick reply chips for a chat app.",
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              chips: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING }
+              }
+            },
+            required: ["chips"]
+          }
+        }
+      });
+
+      const data = JSON.parse(response.text.trim());
+      res.json(data);
+    } catch (error) {
+      // Log the error but provide a safe fallback so the UI doesn't break
+      console.warn('Gemini API high demand or error, falling back to default chips:', error.message || error);
+      res.json({ chips: ["Okay", "Thanks", "Got it"] });
+    }
+  });
 
   // Snapchat OAuth endpoints
   app.get('/api/snapchat/auth/url', (req, res) => {

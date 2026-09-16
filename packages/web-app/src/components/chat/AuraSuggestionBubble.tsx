@@ -7,10 +7,11 @@ export interface AuraSuggestionBubbleProps {
   description: string;
   actionLabel: string;
   onAction: () => void;
+  isCompleted?: boolean;
 }
 
 export const AuraSuggestionBubble: React.FC<AuraSuggestionBubbleProps> = ({
-  title, description, actionLabel, onAction
+  title, description, actionLabel, onAction, isCompleted
 }) => {
   return (
     <motion.div 
@@ -41,9 +42,18 @@ export const AuraSuggestionBubble: React.FC<AuraSuggestionBubbleProps> = ({
 
         <button 
           onClick={onAction}
-          className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-full bg-violet-600 hover:bg-violet-700 transition-colors text-white text-[12px] font-bold tracking-wide shadow-md shadow-violet-900/20"
+          disabled={isCompleted}
+          className={`mt-2 flex items-center gap-1.5 px-4 py-2 rounded-full transition-colors text-[12px] font-bold tracking-wide shadow-md ${
+            isCompleted
+              ? 'bg-green-500/20 text-green-700 dark:text-green-400 border border-green-500/30'
+              : 'bg-violet-600 hover:bg-violet-700 text-white shadow-violet-900/20'
+          }`}
         >
-          {actionLabel} <ChevronRight className="w-3.5 h-3.5" />
+          {isCompleted ? (
+            <>Enabled <CheckCircle2 className="w-3.5 h-3.5" /></>
+          ) : (
+            <>{actionLabel} <ChevronRight className="w-3.5 h-3.5" /></>
+          )}
         </button>
       </div>
     </motion.div>

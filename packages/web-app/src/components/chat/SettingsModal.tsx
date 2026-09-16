@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Shield, Lock, Eye, Bell, Monitor, Smartphone, Settings2, ShieldAlert, Key, Globe, EyeOff, FileDigit, SmartphoneNfc, Server, Zap, Compass, Share2, ChevronRight, Calendar, Sparkles } from 'lucide-react';
 import { ConnectionModal, BridgePlatform } from './ConnectionModal';
+import { DuressModal } from './DuressModal';
 
 export interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  showPreciseTimestamps: boolean;
+  setShowPreciseTimestamps: (v: boolean) => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, showPreciseTimestamps, setShowPreciseTimestamps }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'privacy' | 'bridges' | 'ai' | 'ulocate'>('profile');
   const [managingBridge, setManagingBridge] = useState<BridgePlatform | null>(null);
+  const [showDuressModal, setShowDuressModal] = useState(false);
 
   if (!isOpen) return null;
 
@@ -49,8 +53,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
           </div>
           <div className="flex-1 overflow-y-auto p-6 space-y-8">
             {activeTab === 'profile' && <ProfileTab />}
-            {activeTab === 'security' && <SecurityTab />}
-            {activeTab === 'privacy' && <PrivacyTab />}
+            {activeTab === 'security' && <SecurityTab onConfigureDuress={() => setShowDuressModal(true)} />}
+            {activeTab === 'privacy' && <PrivacyTab showPreciseTimestamps={showPreciseTimestamps} setShowPreciseTimestamps={setShowPreciseTimestamps} />}
             {activeTab === 'bridges' && <BridgesTab setManagingBridge={setManagingBridge} />}
             {activeTab === 'ai' && <AITab />}
             {activeTab === 'ulocate' && <ULocateTab />}
@@ -58,6 +62,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         </div>
       </motion.div>
       <ConnectionModal isOpen={!!managingBridge} platform={managingBridge} onClose={() => setManagingBridge(null)} />
+      <DuressModal isOpen={showDuressModal} onClose={() => setShowDuressModal(false)} />
     </>
   );
 };
@@ -110,8 +115,8 @@ const SettingRow = ({ icon, title, description, action }: { icon?: React.ReactNo
   </div>
 );
 
-const Toggle = ({ active }: { active: boolean }) => (
-  <div className={`w-10 h-6 rounded-full p-1 transition-colors ${active ? 'bg-violet-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+const Toggle = ({ active, onClick }: { active: boolean, onClick?: () => void }) => (
+  <div onClick={onClick} className={`w-10 h-6 rounded-full p-1 transition-colors cursor-pointer ${active ? 'bg-violet-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
     <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${active ? 'translate-x-4' : 'translate-x-0'}`} />
   </div>
 );
@@ -179,7 +184,7 @@ const ProfileTab = () => (
   </>
 );
 
-const SecurityTab = () => (
+const SecurityTab = ({ onConfigureDuress }: { onConfigureDuress: () => void }) => (
   <>
     <Section title="App Lock">
       <SettingRow title="Biometric / Face ID" description="Require scan after 1 minute of inactivity." action={<Toggle active={true} />} />
@@ -189,7 +194,7 @@ const SecurityTab = () => (
         icon={<Lock />} 
         title="Master vs. Decoy PIN" 
         description="Define a secondary PIN that triggers the anti-coercion state." 
-        action={<Button>Configure</Button>} 
+        action={<Button onClick={onConfigureDuress}>Configure</Button>} 
       />
       <SettingRow 
         title="Decoy AI Generation" 
@@ -208,13 +213,14 @@ const SecurityTab = () => (
   </>
 );
 
-const PrivacyTab = () => (
+const PrivacyTab = ({ showPreciseTimestamps, setShowPreciseTimestamps }: { showPreciseTimestamps: boolean, setShowPreciseTimestamps: (v: boolean) => void }) => (
   <>
     <Section title="Visibility Controls">
       <SettingRow title="Last Seen & Online Status" description="Currently set to: Nobody." action={<Button>Change</Button>} />
     </Section>
     <Section title="Messaging Privacy">
       <SettingRow title="Read Receipts" description="Toggle outgoing read status. Disabling prevents you from seeing others." action={<Toggle active={false} />} />
+      <SettingRow title="Precise Timestamps" description="Show exact timestamps on every single message bubble." action={<Toggle active={showPreciseTimestamps} onClick={() => setShowPreciseTimestamps(!showPreciseTimestamps)} />} />
       <SettingRow title="Screen Security" description="Block OS-level screenshots and obscure app in recent switcher." action={<Toggle active={true} />} />
       <SettingRow title="Protect IP in Calls" description="Route WebRTC calls through uChat relay servers to hide IP." action={<Toggle active={true} />} />
       <SettingRow title="Default Shredder Timer" description="Universal TTL (Burn-on-Read) for new chats." action={<Button>Off</Button>} />

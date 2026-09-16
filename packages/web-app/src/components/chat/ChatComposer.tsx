@@ -11,6 +11,7 @@ export interface ChatComposerProps {
   onRecordAudio: () => void;
   onSelectSlashCommand: (cmd: string) => void;
   onOpenStickerStudio: () => void;
+  lastMessageText?: string;
 }
 
 export const ChatComposer: React.FC<ChatComposerProps> = ({
@@ -18,7 +19,8 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   onSend,
   onRecordAudio,
   onSelectSlashCommand,
-  onOpenStickerStudio
+  onOpenStickerStudio,
+  lastMessageText
 }) => {
   const [text, setText] = useState('');
   const [showCommands, setShowCommands] = useState(false);
@@ -28,6 +30,9 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const [showStickers, setShowStickers] = useState(false);
   const [showRouting, setShowRouting] = useState(false);
   
+  const [suggestedChips, setSuggestedChips] = useState<string[]>([]);
+  const [isGeneratingChips, setIsGeneratingChips] = useState(false);
+
   // Track local override for the selected platform
   const [currentPlatform, setCurrentPlatform] = React.useState<SourcePlatform>(platform);
 
@@ -35,6 +40,40 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   React.useEffect(() => {
     setCurrentPlatform(platform);
   }, [platform]);
+
+  React.useEffect(() => {
+    const fetchChips = async () => {
+      if (!lastMessageText) {
+        setSuggestedChips([]);
+        return;
+      }
+      setIsGeneratingChips(true);
+      try {
+        const res = await fetch('/api/suggest-chips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lastMessage: lastMessageText })
+        });
+        const data = await res.json();
+        if (data.chips) {
+          setSuggestedChips(data.chips);
+        }
+      } catch (err) {
+        console.error("Failed to fetch contextual chips", err);
+      } finally {
+        setIsGeneratingChips(false);
+      }
+    };
+    fetchChips();
+  }, [lastMessageText]);
+
+  React.useEffect(() => {
+    const handleQuickReply = (e: any) => {
+      setText(e.detail);
+    };
+    window.addEventListener('insert-quick-reply', handleQuickReply);
+    return () => window.removeEventListener('insert-quick-reply', handleQuickReply);
+  }, []);
 
   // Send button position drag state
   const [sendPos, setSendPos] = useState<'right' | 'left'>('right');
@@ -160,15 +199,32 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             <motion.div 
               key="chip"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-              className="flex justify-center mb-1"
+              className="flex justify-center flex-wrap gap-2 mb-1 px-2"
             >
               <button 
                 onClick={() => setAuraPromptMode(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-violet-100 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-500/20 text-violet-700 dark:text-violet-300 rounded-full text-[11px] font-bold shadow-sm hover:scale-105 transition-transform cursor-text"
+                className="flex items-center justify-center px-3 py-1.5 bg-violet-100 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-500/20 text-violet-700 dark:text-violet-300 rounded-full text-[11px] font-bold shadow-sm hover:scale-105 transition-transform cursor-text gap-1"
+                title="Ask Aura"
               >
-                <SparklesIcon className="w-3.5 h-3.5" />
-                Aura Suggestion: "Sounds perfect!"
+                <SparklesIcon className="w-3 h-3" /> Aura
               </button>
+              
+              {isGeneratingChips && (
+                <div className="flex items-center gap-1.5 px-4 py-1.5 bg-app-surface border border-app-border rounded-full text-[11px] font-bold text-app-text-muted">
+                  <div className="w-3 h-3 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+                  Thinking...
+                </div>
+              )}
+
+              {!isGeneratingChips && suggestedChips.map((chip, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setText(chip)}
+                  className="px-4 py-1.5 bg-app-surface border border-app-border hover:bg-zinc-100 dark:hover:bg-zinc-800 text-app-text rounded-full text-[11px] font-bold shadow-sm hover:scale-105 transition-transform whitespace-nowrap"
+                >
+                  {chip}
+                </button>
+              ))}
             </motion.div>
           )
         )}
@@ -179,14 +235,32 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         {showAttachments && (
           <PopoverWrapper onClose={() => setShowAttachments(false)}>
             <div className="grid grid-cols-4 gap-4 p-4">
-              <AttachmentIcon icon={<ImageIcon />} label="Gallery" color="bg-blue-500" />
-              <AttachmentIcon icon={<Camera />} label="Camera" color="bg-rose-500" />
-              <AttachmentIcon icon={<File />} label="Document" color="bg-indigo-500" />
-              <AttachmentIcon icon={<CreditCard />} label="U-Pay" color="bg-emerald-500" />
-              <AttachmentIcon icon={<MapPin />} label="Location" color="bg-green-500" />
-              <AttachmentIcon icon={<Contact />} label="Contact" color="bg-sky-500" />
-              <AttachmentIcon icon={<PlayCircle />} label="Audio" color="bg-orange-500" />
-              <AttachmentIcon icon={<CheckSquare />} label="Poll" color="bg-yellow-500" />
+              {(() => {
+                const isPWA = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+                
+                return (
+                  <>
+                    <AttachmentIcon icon={<ImageIcon />} label="Gallery" color="bg-blue-500" />
+                    <AttachmentIcon icon={<File />} label="Document" color="bg-indigo-500" />
+                    <AttachmentIcon icon={<CheckSquare />} label="Poll" color="bg-yellow-500" />
+                    
+                    {isPWA ? (
+                      <>
+                        <AttachmentIcon icon={<Camera />} label="Camera" color="bg-rose-500" />
+                        <AttachmentIcon icon={<CreditCard />} label="U-Pay" color="bg-emerald-500" />
+                        <AttachmentIcon icon={<MapPin />} label="Location" color="bg-green-500" />
+                        <AttachmentIcon icon={<Contact />} label="Contact" color="bg-sky-500" />
+                        <AttachmentIcon icon={<PlayCircle />} label="Audio" color="bg-orange-500" />
+                      </>
+                    ) : (
+                      <>
+                         {/* Fallback contacts / simple tools for web */}
+                         <AttachmentIcon icon={<Contact />} label="Contact" color="bg-sky-500" />
+                      </>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </PopoverWrapper>
         )}

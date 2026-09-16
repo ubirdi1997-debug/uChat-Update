@@ -14,7 +14,9 @@ export interface MessageBubbleProps {
   onForwardToAssistant: (id: string) => void;
   onMessageAction?: (action: 'copy' | 'delete' | 'report', id: string) => void;
   onTranslate?: (id: string) => void;
+  onActionNudge?: (type: string) => void;
   searchQuery?: string;
+  showTimestamp?: boolean;
   children?: React.ReactNode;
 }
 
@@ -25,7 +27,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onForwardToAssistant,
   onMessageAction,
   onTranslate,
+  onActionNudge,
   searchQuery,
+  showTimestamp = true,
   children
 }) => {
   if (message.mediaType === 'security_nudge' || message.mediaType === 'duress_setup') {
@@ -35,7 +39,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         title={message.nudgeData?.title || 'System Alert'}
         description={message.nudgeData?.description || ''}
         actionLabel={message.nudgeData?.actionLabel || 'View'}
-        onAction={() => console.log('Action Nudge')}
+        onAction={() => onActionNudge && onActionNudge(message.mediaType)}
       />
     );
   }
@@ -46,7 +50,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         title={message.nudgeData?.title || 'Aura Suggestion'}
         description={message.nudgeData?.description || ''}
         actionLabel={message.nudgeData?.actionLabel || 'Accept'}
-        onAction={() => console.log('Aura Suggestion Action')}
+        onAction={() => onActionNudge && onActionNudge(message.mediaType)}
+        isCompleted={message.nudgeData?.isCompleted}
       />
     );
   }
@@ -110,20 +115,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               ? 'bg-transparent shadow-none border-none'
               : isMe 
                 ? 'bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-3xl rounded-br-sm' 
-                : 'bg-white dark:bg-[#1a1a1c] text-zinc-800 dark:text-zinc-100 border border-zinc-100 dark:border-zinc-800/60 rounded-3xl rounded-bl-sm'
+                : 'bg-app-surface text-app-text border border-app-border rounded-3xl rounded-bl-sm'
           }`}
         >
           {/* Action Tray (Hover) */}
-          <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm shadow-md border border-zinc-200 dark:border-zinc-700/50 rounded-full px-1.5 py-1 z-10 transition-all duration-200 ${
+          <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 bg-app-bg/90 backdrop-blur-sm shadow-md border border-app-border/50 rounded-full px-1.5 py-1 z-10 transition-all duration-200 ${
             isMe ? 'right-full mr-1 -translate-x-2 group-hover:translate-x-0' : 'left-full ml-1 translate-x-2 group-hover:translate-x-0'
           }`}>
-            <button onClick={() => onReply(message.id)} className="p-1 sm:p-1.5 text-zinc-500 hover:text-violet-600 dark:text-zinc-400 dark:hover:text-violet-400 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+            <button onClick={() => onReply(message.id)} className="p-1 sm:p-1.5 text-app-text-muted hover:text-violet-500 rounded-full hover:bg-app-surface-hover transition-colors">
               <Reply className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
-            <button onClick={() => onBranchSideThread(message.id)} className="p-1 sm:p-1.5 text-zinc-500 hover:text-violet-600 dark:text-zinc-400 dark:hover:text-violet-400 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+            <button onClick={() => onBranchSideThread(message.id)} className="p-1 sm:p-1.5 text-app-text-muted hover:text-violet-500 rounded-full hover:bg-app-surface-hover transition-colors">
               <SplitSquareHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
-            <button onClick={() => onForwardToAssistant(message.id)} className="p-1 sm:p-1.5 text-zinc-500 hover:text-amber-500 dark:text-zinc-400 dark:hover:text-amber-400 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+            <button onClick={() => onForwardToAssistant(message.id)} className="p-1 sm:p-1.5 text-app-text-muted hover:text-amber-500 rounded-full hover:bg-app-surface-hover transition-colors">
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
@@ -146,7 +151,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                   {Array.from({ length: 30 }).map((_, i) => (
                     <div 
                       key={i} 
-                      className={`w-1 rounded-full ${isMe ? 'bg-white/60' : 'bg-zinc-300 dark:bg-zinc-600'}`} 
+                      className={`w-1 rounded-full ${isMe ? 'bg-white/60' : 'bg-app-surface-hover'}`} 
                       style={{ 
                         height: `${Math.max(20, Math.sin(i * 0.5) * 100)}%`,
                         opacity: isPlaying && i % 3 === 0 ? 0.5 : 1
@@ -156,14 +161,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 </div>
               </div>
               <div className="flex items-center justify-between mt-1">
-                <span className={`text-[11px] font-bold ${isMe ? 'text-white/70' : 'text-zinc-500'}`}>{message.audioDuration || '0:00'}</span>
+                <span className={`text-[11px] font-bold ${isMe ? 'text-white/70' : 'text-app-text-muted'}`}>{message.audioDuration || '0:00'}</span>
                 {message.transcription && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); setShowTranscription(!showTranscription); }}
                     className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md transition-colors ${
                       isMe 
                         ? 'bg-white/20 hover:bg-white/30 text-white' 
-                        : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400'
+                        : 'bg-app-surface hover:bg-app-surface-hover text-app-text-muted'
                     }`}
                   >
                     {showTranscription ? 'Hide Text' : 'Transcribe'}
@@ -179,7 +184,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className={`mt-2 pt-2 border-t ${isMe ? 'border-white/20' : 'border-zinc-200 dark:border-zinc-700'} text-[13px] font-medium opacity-90 leading-relaxed`}>
+                    <div className={`mt-2 pt-2 border-t ${isMe ? 'border-white/20' : 'border-app-border'} text-[13px] font-medium opacity-90 leading-relaxed`}>
                       <div className={`flex items-center gap-1 text-[10px] font-bold mb-1 uppercase tracking-wider ${isMe ? 'text-white/70' : 'text-violet-600 dark:text-violet-400'}`}>
                         <FileAudio className="w-3 h-3" /> Local NPU Transcription
                       </div>
@@ -232,11 +237,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           )}
 
           {message.translation && (
-            <div className={`mt-2 pt-2 border-t ${isMe ? 'border-white/20' : 'border-zinc-200 dark:border-zinc-700'} text-[13px] sm:text-[14px] font-medium opacity-90`}>
+            <div className={`mt-2 pt-2 border-t ${isMe ? 'border-white/20' : 'border-app-border'} text-[13px] sm:text-[14px] font-medium opacity-90`}>
               <div className={`flex items-center gap-1 text-[10px] font-bold mb-1 uppercase tracking-wider ${isMe ? 'text-white/70' : 'text-violet-600 dark:text-violet-400'}`}>
                 <Sparkles className="w-3 h-3" /> Aura Translation
               </div>
               {message.translation}
+            </div>
+          )}
+
+          {message.quickReplies && message.quickReplies.length > 0 && !isMe && (
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-app-border">
+              {message.quickReplies.map((reply, i) => (
+                <button 
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new CustomEvent('insert-quick-reply', { detail: reply })); }}
+                  className="px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50 text-[12px] font-bold transition-all shadow-sm active:scale-95"
+                >
+                  {reply}
+                </button>
+              ))}
             </div>
           )}
 
@@ -258,15 +277,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 />
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                  className={`absolute top-full mt-2 z-50 w-40 sm:w-48 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/80 rounded-2xl shadow-xl overflow-hidden ${isMe ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
+                  className={`absolute top-full mt-2 z-50 w-40 sm:w-48 bg-app-bg border border-app-border/80 rounded-2xl shadow-xl overflow-hidden ${isMe ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
                 >
-                  <button onClick={() => handleAction('copy')} className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-[14px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors">
+                  <button onClick={() => handleAction('copy')} className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-[14px] font-bold text-app-text hover:bg-app-surface-hover/50 transition-colors">
                     <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Copy Text
                   </button>
-                  <button onClick={() => handleAction('report')} className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-[14px] font-bold text-amber-600 dark:text-amber-500 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors">
+                  <button onClick={() => handleAction('report')} className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-[14px] font-bold text-amber-600 dark:text-amber-500 hover:bg-app-surface-hover/50 transition-colors">
                     <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Report Issue
                   </button>
-                  <div className="h-px bg-zinc-200 dark:bg-zinc-700/50 mx-2" />
+                  <div className="h-px bg-app-border mx-2" />
                   <button onClick={() => handleAction('delete')} className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-[14px] font-bold text-rose-600 dark:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Delete
                   </button>
@@ -277,14 +296,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         </motion.div>
 
         {/* Floating Metadata */}
-        <div className={`flex items-center gap-1 mb-1 text-[10px] sm:text-[11px] font-medium select-none text-zinc-400 dark:text-zinc-500 flex-shrink-0`}>
-          <span>{message.timestamp}</span>
+        <div className={`flex items-center gap-1 mb-1 text-[10px] sm:text-[11px] font-medium select-none text-app-text-muted dark:text-app-text-muted flex-shrink-0`}>
+          {showTimestamp && <span>{message.timestamp}</span>}
           {isMe && (
             <>
-              {message.status === 'sent' && <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+              {(!message.status || message.status === 'sent') && <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               {message.status === 'delivered' && <CheckCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               {message.status === 'read' && <CheckCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500 dark:text-blue-400" />}
-              {!message.status && <CheckCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-violet-500 dark:text-violet-400" />}
             </>
           )}
         </div>

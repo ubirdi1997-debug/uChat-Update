@@ -71,22 +71,22 @@ export const ComposeOverlay: React.FC<ComposeOverlayProps> = ({ isOpen, onClose 
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="absolute inset-0 z-50 bg-white dark:bg-[#121214] flex flex-col"
+        className="absolute inset-0 z-50 bg-app-bg flex flex-col"
       >
         {showCelebration && <Confetti />}
 
-        <div className="p-4 sm:p-5 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60 bg-white/80 dark:bg-[#121214]/80 backdrop-blur-md z-10 sticky top-0">
+        <div className="p-4 sm:p-5 flex items-center justify-between border-b border-app-border bg-app-bg/80 backdrop-blur-md z-10 sticky top-0">
           <div className="flex items-center gap-3">
             {view === 'connect' && (
-              <button onClick={() => setView('main')} className="p-1.5 -ml-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors">
+              <button onClick={() => setView('main')} className="p-1.5 -ml-2 rounded-full hover:bg-app-surface-hover text-app-text-muted transition-colors">
                 <ChevronLeft className="w-5 h-5" />
               </button>
             )}
-            <h2 className="font-extrabold text-lg text-zinc-900 dark:text-zinc-50 tracking-tight">
+            <h2 className="font-extrabold text-lg text-app-text tracking-tight">
               {view === 'main' ? 'Compose' : 'Connect Platform'}
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors bg-zinc-50 dark:bg-[#1a1a1c]">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-app-surface-hover text-app-text-muted transition-colors bg-app-surface">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -99,38 +99,38 @@ export const ComposeOverlay: React.FC<ComposeOverlayProps> = ({ isOpen, onClose 
                 initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
                 className="space-y-2"
               >
-                <button className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-zinc-50 dark:hover:bg-[#1a1a1c] border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 transition-all text-left group">
+                <button className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-app-surface-hover border border-transparent hover:border-app-border transition-all text-left group">
                   <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform">
                     <User className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">Message Single User</div>
-                    <div className="text-[12px] font-medium text-zinc-500">Start a direct chat</div>
+                    <div className="text-[15px] font-bold text-app-text">Message Single User</div>
+                    <div className="text-[12px] font-medium text-app-text-muted">Start a direct chat</div>
                   </div>
                 </button>
 
-                <button className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-zinc-50 dark:hover:bg-[#1a1a1c] border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 transition-all text-left group">
+                <button className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-app-surface-hover border border-transparent hover:border-app-border transition-all text-left group">
                   <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                     <Users className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">Create Group</div>
-                    <div className="text-[12px] font-medium text-zinc-500">Talk with multiple friends</div>
+                    <div className="text-[15px] font-bold text-app-text">Create Group</div>
+                    <div className="text-[12px] font-medium text-app-text-muted">Talk with multiple friends</div>
                   </div>
                 </button>
 
-                <div className="my-4 h-px bg-zinc-100 dark:bg-zinc-800/60" />
+                <div className="my-4 h-px bg-app-border" />
 
                 <button 
                   onClick={() => setView('connect')}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-zinc-50 dark:hover:bg-[#1a1a1c] border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 transition-all text-left group"
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-app-surface-hover border border-transparent hover:border-app-border transition-all text-left group"
                 >
                   <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
                     <Link2 className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">Connect to Sync</div>
-                    <div className="text-[12px] font-medium text-zinc-500">Import messages from other apps</div>
+                    <div className="text-[15px] font-bold text-app-text">Connect to Sync</div>
+                    <div className="text-[12px] font-medium text-app-text-muted">Import messages from other apps</div>
                   </div>
                 </button>
               </motion.div>
@@ -142,7 +142,7 @@ export const ComposeOverlay: React.FC<ComposeOverlayProps> = ({ isOpen, onClose 
                 initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }}
                 className="space-y-3"
               >
-                <p className="text-[13px] font-medium text-zinc-500 mb-4 px-2">
+                <p className="text-[13px] font-medium text-app-text-muted mb-4 px-2">
                   Select a platform to sync your existing conversations directly into uChat.
                 </p>
 
@@ -151,13 +151,13 @@ export const ComposeOverlay: React.FC<ComposeOverlayProps> = ({ isOpen, onClose 
                     key={app.id}
                     onClick={() => handleConnect(app.id)}
                     disabled={connectingId !== null || showCelebration}
-                    className="relative w-full flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-[#1a1a1c] border border-zinc-200 dark:border-zinc-800 hover:border-violet-500/50 transition-all text-left group overflow-hidden"
+                    className="relative w-full flex items-center gap-4 p-4 rounded-2xl bg-app-surface border border-app-border hover:border-violet-500/50 transition-all text-left group overflow-hidden"
                   >
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${app.bg} ${app.color}`}>
                       {app.icon}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">{app.name}</div>
+                      <div className="text-[15px] font-bold text-app-text">{app.name}</div>
                     </div>
                     
                     {connectingId === app.id && (

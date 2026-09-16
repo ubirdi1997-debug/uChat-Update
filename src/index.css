@@ -1,6 +1,33 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-app-bg: var(--app-bg);
+  --color-app-surface: var(--app-surface);
+  --color-app-surface-hover: var(--app-surface-hover);
+  --color-app-text: var(--app-text);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-border: var(--app-border);
+}
+
+:root {
+  --app-bg: #ffffff;
+  --app-surface: #f4f4f5; /* zinc-50 */
+  --app-surface-hover: #e4e4e7; /* zinc-200 */
+  --app-text: #18181b; /* zinc-900 */
+  --app-text-muted: #71717a; /* zinc-500 */
+  --app-border: #f4f4f5; /* zinc-100 */
+}
+
+.dark {
+  --app-bg: #09090b;
+  --app-surface: #121214;
+  --app-surface-hover: #1a1a1c;
+  --app-text: #fafafa; /* zinc-50 */
+  --app-text-muted: #a1a1aa; /* zinc-400 */
+  --app-border: rgba(39, 39, 42, 0.6); /* zinc-800/60 */
+}
+
 /* Hide scrollbar globally for absolute cleanliness */
 * {
   scrollbar-width: none; /* Firefox */
