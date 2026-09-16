@@ -60,7 +60,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showTranscription, setShowTranscription] = useState(false);
+  const [reactions, setReactions] = useState<string[]>(message.reactions || []);
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const toggleReaction = (emoji: string) => {
+    setReactions(prev => 
+      prev.includes(emoji) ? prev.filter(e => e !== emoji) : [...prev, emoji]
+    );
+    setShowContextMenu(false);
+  };
+
+  const COMMON_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
 
   const handlePressStart = () => {
     pressTimer.current = setTimeout(() => {
@@ -265,6 +275,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             </div>
           )}
 
+          {/* Reactions Display */}
+          {reactions.length > 0 && (
+            <div className={`absolute -bottom-3 ${isMe ? 'right-4' : 'left-4'} flex flex-wrap gap-1 z-20`}>
+              {reactions.map((emoji, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); toggleReaction(emoji); }}
+                  className="flex items-center justify-center min-w-[24px] h-[24px] px-1.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full shadow-sm text-[12px] hover:scale-110 transition-transform cursor-pointer text-black dark:text-white"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Context Menu Overlay */}
           <AnimatePresence>
             {showContextMenu && (
@@ -277,8 +302,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 />
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                  className={`absolute top-full mt-2 z-50 w-40 sm:w-48 bg-app-bg border border-app-border/80 rounded-2xl shadow-xl overflow-hidden ${isMe ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
+                  className={`absolute top-full mt-2 z-50 w-[240px] bg-app-bg border border-app-border/80 rounded-2xl shadow-xl overflow-hidden ${isMe ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
                 >
+                  <div className="flex items-center justify-between px-3 py-3 bg-app-surface-hover/30 border-b border-app-border/50">
+                    {COMMON_REACTIONS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        onClick={() => toggleReaction(emoji)}
+                        className={`text-[18px] sm:text-[20px] hover:scale-125 transition-transform ${reactions.includes(emoji) ? 'bg-violet-100 dark:bg-violet-900/30 rounded-full' : ''}`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
                   <button onClick={() => handleAction('copy')} className="w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-[13px] sm:text-[14px] font-bold text-app-text hover:bg-app-surface-hover/50 transition-colors">
                     <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Copy Text
                   </button>

@@ -43,6 +43,7 @@ export interface ChatMessage {
     actionLabel: string;
     isCompleted?: boolean;
   };
+  reactions?: string[];
 }
 
 export interface GmailCardData {
